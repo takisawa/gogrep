@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -13,18 +14,21 @@ const BUFSIZE = 4096
 func main() {
 	var fp *os.File
 	var err error
+	var _ = flag.Bool("i", false, "Ignore Case")
+
+	flag.Parse()
+
+	var args = flag.Args()
 
 	if len(os.Args) < 3 {
 		fmt.Println("Invalid arguments")
 		os.Exit(1)
 	}
 
-	regexp_text := os.Args[1]
+	regexp_text := args[0]
 	regexp := regexp.MustCompile(regexp_text)
 
-	files := os.Args[2:]
-
-	for _, file := range files {
+	for _, file := range args[1:] {
 		fp, err = os.Open(file)
 
 		if err != nil {
