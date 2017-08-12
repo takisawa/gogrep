@@ -14,7 +14,7 @@ const BUFSIZE = 4096
 func main() {
 	var fp *os.File
 	var err error
-	var _ = flag.Bool("i", false, "Ignore Case")
+	var caseInsensitive = flag.Bool("i", false, "case-insensitive")
 
 	flag.Parse()
 
@@ -26,6 +26,11 @@ func main() {
 	}
 
 	regexp_text := args[0]
+
+  if *caseInsensitive {
+    regexp_text = "(?i)" + regexp_text
+  }
+
 	regexp := regexp.MustCompile(regexp_text)
 
 	for _, file := range args[1:] {
