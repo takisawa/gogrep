@@ -11,9 +11,10 @@ import (
 
 const BUFSIZE = 4096
 
-func grepOneFile(pattern *regexp.Regexp, fname string) {
+func grepOneFile(pattern *regexp.Regexp, fname string, done chan struct{}) {
 	var fp *os.File
 	var err error
+	var reader *bufio.Reader
 
 	fp, err = os.Open(fname)
 
@@ -23,7 +24,7 @@ func grepOneFile(pattern *regexp.Regexp, fname string) {
 
 	defer fp.Close()
 
-	reader := bufio.NewReaderSize(fp, BUFSIZE)
+	reader = bufio.NewReaderSize(fp, BUFSIZE)
 	for line := ""; err == nil; line, err = reader.ReadString('\n') {
 		if pattern.MatchString(line) {
 			fmt.Print(line)
@@ -33,22 +34,28 @@ func grepOneFile(pattern *regexp.Regexp, fname string) {
 	if err != io.EOF {
 		panic(err)
 	}
+
+	done <- struct{}{}
 }
 
 func main() {
-	var caseInsensitive = flag.Bool("i", false, "case-insensitive")
+	var args []string
+	var regexp_text string
 	var pattern *regexp.Regexp
+	var done = make(chan struct{})
+
+	var caseInsensitive = flag.Bool("i", false, "case-insensitive")
 
 	flag.Parse()
 
-	var args = flag.Args()
+	args = flag.Args()
 
-	if len(os.Args) < 3 {
+	if flag.NArg() < 2 {
 		fmt.Println("Invalid arguments")
 		os.Exit(1)
 	}
 
-	regexp_text := args[0]
+	regexp_text = args[0]
 
 	if *caseInsensitive {
 		regexp_text = "(?i)" + regexp_text
@@ -57,6 +64,12 @@ func main() {
 	pattern = regexp.MustCompile(regexp_text)
 
 	for _, fname := range args[1:] {
-		grepOneFile(pattern, fname)
+		go grepOneFile(pattern, fname, done)
 	}
+
+	for i := 0; i < flag.NArg()-1; i++ {
+		<-done
+	}
+
+	close(done)
 }
