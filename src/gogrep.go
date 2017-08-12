@@ -11,10 +11,33 @@ import (
 
 const BUFSIZE = 4096
 
-func main() {
+func grepOneFile(pattern *regexp.Regexp, fname string) {
 	var fp *os.File
 	var err error
+
+	fp, err = os.Open(fname)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer fp.Close()
+
+	reader := bufio.NewReaderSize(fp, BUFSIZE)
+	for line := ""; err == nil; line, err = reader.ReadString('\n') {
+		if pattern.MatchString(line) {
+			fmt.Print(line)
+		}
+	}
+
+	if err != io.EOF {
+		panic(err)
+	}
+}
+
+func main() {
 	var caseInsensitive = flag.Bool("i", false, "case-insensitive")
+	var pattern *regexp.Regexp
 
 	flag.Parse()
 
@@ -31,26 +54,9 @@ func main() {
 		regexp_text = "(?i)" + regexp_text
 	}
 
-	regexp := regexp.MustCompile(regexp_text)
+	pattern = regexp.MustCompile(regexp_text)
 
-	for _, file := range args[1:] {
-		fp, err = os.Open(file)
-
-		if err != nil {
-			panic(err)
-		}
-
-		defer fp.Close()
-
-		reader := bufio.NewReaderSize(fp, BUFSIZE)
-		for line := ""; err == nil; line, err = reader.ReadString('\n') {
-			if regexp.MatchString(line) {
-				fmt.Print(line)
-			}
-		}
-
-		if err != io.EOF {
-			panic(err)
-		}
+	for _, fname := range args[1:] {
+		grepOneFile(pattern, fname)
 	}
 }
