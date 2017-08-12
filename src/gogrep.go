@@ -27,9 +27,9 @@ func main() {
 
 	regexp_text := args[0]
 
-  if *caseInsensitive {
-    regexp_text = "(?i)" + regexp_text
-  }
+	if *caseInsensitive {
+		regexp_text = "(?i)" + regexp_text
+	}
 
 	regexp := regexp.MustCompile(regexp_text)
 
