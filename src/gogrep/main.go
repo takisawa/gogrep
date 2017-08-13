@@ -11,7 +11,7 @@ import (
 
 const BUFSIZE = 4096
 
-func grepOneFile(pattern *regexp.Regexp, fname string, done chan struct{}) {
+func grepOneFile(out *os.File, pattern *regexp.Regexp, fname string, done chan struct{}) {
 	var fp *os.File
 	var err error
 	var reader *bufio.Reader
@@ -27,7 +27,7 @@ func grepOneFile(pattern *regexp.Regexp, fname string, done chan struct{}) {
 	reader = bufio.NewReaderSize(fp, BUFSIZE)
 	for line := ""; err == nil; line, err = reader.ReadString('\n') {
 		if pattern.MatchString(line) {
-			fmt.Print(line)
+			fmt.Fprint(out, line)
 		}
 	}
 
@@ -64,7 +64,7 @@ func main() {
 	pattern = regexp.MustCompile(regexp_text)
 
 	for _, fname := range args[1:] {
-		go grepOneFile(pattern, fname, done)
+		go grepOneFile(os.Stdout, pattern, fname, done)
 	}
 
 	for i := 0; i < flag.NArg()-1; i++ {
