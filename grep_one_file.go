@@ -1,4 +1,4 @@
-package gogrep
+package main
 
 import (
 	"bufio"
@@ -10,7 +10,7 @@ import (
 
 const BUFSIZE = 4096
 
-func GrepOneFile(out *os.File, pattern *regexp.Regexp, fname string, done chan struct{}) {
+func grepOneFile(out *os.File, pattern *regexp.Regexp, fname string, done chan struct{}) {
 	var fp *os.File
 	var err error
 	var reader *bufio.Reader

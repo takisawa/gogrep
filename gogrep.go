@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-  "gogrep"
 	"os"
 	"regexp"
 )
@@ -34,7 +33,7 @@ func main() {
 	pattern = regexp.MustCompile(regexp_text)
 
 	for _, fname := range args[1:] {
-		go gogrep.GrepOneFile(os.Stdout, pattern, fname, done)
+		go grepOneFile(os.Stdout, pattern, fname, done)
 	}
 
 	for i := 0; i < flag.NArg()-1; i++ {
