@@ -10,6 +10,10 @@ import (
 
 const BUFSIZE = 4096
 
+func matchLine(pattern *regexp.Regexp, line string) bool {
+	return pattern.MatchString(line)
+}
+
 func grepOneFile(out *os.File, pattern *regexp.Regexp, fname string, done chan struct{}) {
 	var fp *os.File
 	var err error
@@ -25,7 +29,7 @@ func grepOneFile(out *os.File, pattern *regexp.Regexp, fname string, done chan s
 
 	reader = bufio.NewReaderSize(fp, BUFSIZE)
 	for line := ""; err == nil; line, err = reader.ReadString('\n') {
-		if pattern.MatchString(line) {
+		if matchLine(pattern, line) {
 			fmt.Fprint(out, line)
 		}
 	}
