@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+  "io/ioutil"
 	"os"
 	"regexp"
 )
@@ -33,7 +34,15 @@ func main() {
 	pattern = regexp.MustCompile(regexp_text)
 
 	for _, fname := range args[1:] {
-		go grepOneFile(os.Stdout, pattern, fname, done)
+    entries, err := ioutil.ReadDir(fname)
+    if err != nil {
+      panic(fmt.Sprintf("Invalid fname: %s, %v", fname, err))
+    }
+    for _, entry := range entries {
+      if !entry.IsDir() {
+		    go grepOneFile(os.Stdout, pattern, fname, done)
+      }
+    }
 	}
 
 	for i := 0; i < flag.NArg()-1; i++ {
